@@ -9,6 +9,7 @@ using Zenject;
 
 public class BuildingSystem_sc : MonoBehaviour
 {
+    //todo:既然有繼承，為什麼不直接用Grid就好？
     public GridLayout gridLayout;
 
     Grid _grid;
@@ -58,10 +59,10 @@ public class BuildingSystem_sc : MonoBehaviour
 
     public Vector3 SnapCoordinateToGrid(Vector3 v3)
     {
-        //世界到一格
+        //世界座標到最近的一格Grid
         Vector3Int cellPos = gridLayout.WorldToCell(v3);
 
-        //一格取中間
+        //一格取中間位置
         Vector3 centerWorld = _grid.GetCellCenterWorld(cellPos);
         return centerWorld;
     }
@@ -69,10 +70,10 @@ public class BuildingSystem_sc : MonoBehaviour
     public void InitializeWithObject(GameObject prefab)
     {
         Vector3 position = SnapCoordinateToGrid(Vector3.zero);
-        var obj = _container.InstantiatePrefab(prefab);
+        var obj = _container.InstantiatePrefab(prefab, position, Quaternion.identity, null);
         // GameObject obj = Instantiate(prefab, position, Quaternion.identity);
-        DragObject_sc dragObjectSc = obj.AddComponent<DragObject_sc>();
-        _container.Inject(dragObjectSc);
+        DragObject_sc o = obj.AddComponent<DragObject_sc>();
+        _container.Inject(o);
         _gameObject2Place = obj.gameObject.GetComponent<PlaceableObject_sc>();
     }
 }

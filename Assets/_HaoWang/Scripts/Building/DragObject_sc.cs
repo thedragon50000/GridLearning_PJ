@@ -11,7 +11,7 @@ public class DragObject_sc : MonoBehaviour
     private void OnMouseDown()
     {
         print("MouseDown");
-        //todo: for what?
+        //避免滑鼠點在太邊邊導致還沒拖曳就直接位移的情形
         v3Offset = transform.position - buildSystem.V3GetMouseWorldPosition();
     }
 
