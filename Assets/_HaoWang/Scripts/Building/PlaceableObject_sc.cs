@@ -5,8 +5,9 @@ using Zenject;
 public class PlaceableObject_sc : MonoBehaviour
 {
     [Inject] private BuildingSystem_sc _buildingSystem;
-    public bool _bPlaced { get; private set; }
-    public Vector3Int v3Size { get; private set; }
+    private bool Placed { get; set; }
+    public Vector3Int Size { get; private set; }
+    
     private Vector3[] _v3Vertices;
 
     public void GetColliderVertexPositionsLocal()
@@ -32,11 +33,10 @@ public class PlaceableObject_sc : MonoBehaviour
             Vector3 worldPos = transform.TransformPoint(_v3Vertices[i]);
 
             //每個點的網格座標
-            // v3Int[i] = _buildingSystem.gridLayout.WorldToCell(worldPos);
-            v3Int[i] = _buildingSystem.grid.WorldToCell(worldPos);
+            v3Int[i] = _buildingSystem.gridLayout.WorldToCell(worldPos);
         }
 
-        v3Size = new Vector3Int(Mathf.Abs((v3Int[0] - v3Int[1]).x),
+        Size = new Vector3Int(Mathf.Abs((v3Int[0] - v3Int[1]).x),
             Mathf.Abs((v3Int[0] - v3Int[3]).y), 1);
     }
 
@@ -55,6 +55,6 @@ public class PlaceableObject_sc : MonoBehaviour
     {
         DragObject_sc drag = GetComponent<DragObject_sc>();
         Destroy(drag);
-        _bPlaced = true;
+        Placed = true;
     }
 }
