@@ -1,18 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UniRx;
+using Unity.VisualScripting;
 using Zenject;
 
 public class BuildingSystem_sc : MonoBehaviour
 {
     [Inject] private DiContainer _container;
 
-    //todo:既然有繼承，為什麼不直接用Grid就好？
-    public GridLayout gridLayout;
+    // todo:既然有繼承，為什麼不直接用Grid就好？(目前用Grid，沒出錯)
+    // public GridLayout gridLayout;
 
     public Grid grid;
 
@@ -26,7 +23,7 @@ public class BuildingSystem_sc : MonoBehaviour
 
     public void Awake()
     {
-        grid = gridLayout.gameObject.GetComponent<Grid>();
+        // grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
     public void Start()
@@ -58,47 +55,48 @@ public class BuildingSystem_sc : MonoBehaviour
         {
             if (CanBePlaced(_object2Place))
             {
-                print("yes.");
+                // print("yes.");
                 _object2Place.Place();
-                //todo: can't use grid?
-                Vector3Int start = gridLayout.WorldToCell(_object2Place.V3GetStartPosition());
-                TakeArea(start, _object2Place.Size);
+                Vector3Int start = grid.WorldToCell(_object2Place.V3GetStartPosition());
+                // Vector3Int start = gridLayout.WorldToCell(_object2Place.V3GetStartPosition());
+                TakeArea(start, _object2Place.V3Size);
             }
             else
             {
                 Destroy(_object2Place.gameObject);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            _object2Place.RotatePrefab();
+        }
     }
 
     #endregion
 
-    #region Utils
+    #region Utils(工具)
 
+    /// 滑鼠的位置轉為射線
     public Vector3 V3GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            return hit.point;
-        }
-        else
-        {
-            return Vector3.zero;
-        }
+        return Physics.Raycast(ray, out RaycastHit hit) ? hit.point : Vector3.zero;
     }
 
+    /// 將座標捕捉到網格中點
     public Vector3 SnapCoordinateToGrid(Vector3 v3)
     {
         //世界座標到最近的一格Grid
-        Vector3Int cellPos = gridLayout.WorldToCell(v3);
+        Vector3Int cellPos = grid.WorldToCell(v3);
+        // Vector3Int cellPos = gridLayout.WorldToCell(v3);
 
-        //一格取中間位置
+        //取那一格的正中間位置的世界座標
         Vector3 centerWorld = grid.GetCellCenterWorld(cellPos);
         return centerWorld;
     }
 
-    //todo: what is this?
+    //取得指定區域的全部tilemap(為了判斷是否可以放置prefab)
     TileBase[] GetTilesBlock(BoundsInt area, Tilemap tilemap)
     {
         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
@@ -117,23 +115,34 @@ public class BuildingSystem_sc : MonoBehaviour
 
     #region Building Placement
 
+    /// <summary>
+    /// 將指定的prefab設為_object2Place
+    /// </summary>
+    /// <param name="prefab"></param>
     private void InitializeWithObject(GameObject prefab)
     {
         Vector3 position = SnapCoordinateToGrid(Vector3.zero);
         var obj = _container.InstantiatePrefab(prefab, position, Quaternion.identity, null);
-        DragObject_sc o = obj.AddComponent<DragObject_sc>();
+        DragObject_sc o = obj.GetOrAddComponent<DragObject_sc>();
         _container.Inject(o);
         _object2Place = obj.gameObject.GetComponent<PlaceableObject_sc>();
     }
 
     bool CanBePlaced(PlaceableObject_sc placeable)
     {
-        BoundsInt area = new BoundsInt();
-        //todo: 不能不用gridLayout了?
-        area.position = gridLayout.WorldToCell(_object2Place.V3GetStartPosition());
-        area.size = placeable.Size;
-        //不+1的話會無條件捨去小數點，只佔一格的prefab就等於不佔空間了
+        // BoundsInt是Unity中的一個結構體，用於表示一個整數邊界框。
+        // BoundsInt包含一個位置向量position(Vector3Int)和一個大小向量size(Vector3Int)，分別表示邊界框的位置和大小。
+        // BoundsInt可以用於在整數網格上進行碰撞檢測、物體選擇等操作。
+        BoundsInt area = new BoundsInt
+        {
+            position = grid.WorldToCell(_object2Place.V3GetStartPosition()),
+            // area.position = gridLayout.WorldToCell(_object2Place.V3GetStartPosition());
+            size = placeable.V3Size
+        };
+
+        //不+1的話會無條件捨去小數點，這樣只佔一格的prefab會因為長寬都略小於1，就等於不佔空間了
         area.size = new Vector3Int(area.size.x + 1, area.size.y + 1, area.size.z);
+
 
         TileBase[] baseArray = GetTilesBlock(area, mainTilemap);
         foreach (TileBase b in baseArray)
@@ -149,10 +158,12 @@ public class BuildingSystem_sc : MonoBehaviour
 
     #endregion
 
-    //確定要把物品擺在那之後，直接把地佔據不給別人擺
-    public void TakeArea(Vector3Int start, Vector3Int size)
+    //確定要把物品擺在那之後，直接把空間佔據不給別人擺
+    private void TakeArea(Vector3Int start, Vector3Int size)
     {
-        //Collider大小會直接影響到佔地面積
+        // Collider大小會直接影響到佔地面積
+        // BoxFill:從起點開始一長寬高填滿tile base
         mainTilemap.BoxFill(start, crossPipeTileBase, start.x, start.y, start.x + size.x, start.y + size.y);
+        _object2Place = null;
     }
 }
