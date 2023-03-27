@@ -5,10 +5,13 @@ using Zenject;
 public class PlaceableObject_sc : MonoBehaviour
 {
     [Inject] private BuildingSystem_sc _buildingSystem;
-    
+
     private bool Placed { get; set; }
     public Vector3Int V3Size { get; private set; }
 
+    /// <summary>
+    /// 以center為準，四個角的相對座標
+    /// </summary>
     private Vector3[] _v3Vertices;
 
     private void Start()
@@ -57,7 +60,7 @@ public class PlaceableObject_sc : MonoBehaviour
     }
 
     /// <summary>
-    /// 取得對prefab來說是(0,0,0)的那個點的位置(旋轉的重心)
+    /// 取得對prefab來說左下那個點的位置，以此為起點再用「長寬」來計算佔地面積
     /// </summary>
     /// <returns></returns>
     public Vector3 V3GetStartPosition()
@@ -73,19 +76,21 @@ public class PlaceableObject_sc : MonoBehaviour
         Placed = true;
     }
 
-    // 旋轉prefab時也要轉
     public void RotatePrefab()
     {
         transform.Rotate(0, 90, 0);
-        V3Size = new Vector3Int(V3Size.y, V3Size.x, 1);
-
         
+        //======================================================
+        // 更換StartPosition
         Vector3[] temp = new Vector3[_v3Vertices.Length];
         for (int i = 0; i < temp.Length; i++)
         {
             temp[i] = _v3Vertices[(i + 1) % _v3Vertices.Length];
         }
-        
+
         _v3Vertices = temp;
+
+        //長寬互換，因為計算佔地時是用從StartPosition為起點用長和寬計算
+        V3Size = new Vector3Int(V3Size.y, V3Size.x, 1);
     }
 }

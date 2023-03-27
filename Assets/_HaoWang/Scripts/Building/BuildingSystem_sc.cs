@@ -84,7 +84,7 @@ public class BuildingSystem_sc : MonoBehaviour
         return Physics.Raycast(ray, out RaycastHit hit) ? hit.point : Vector3.zero;
     }
 
-    /// 將座標捕捉到網格中點
+    /// 將座標捕捉到網格中點(只要在網格內，就回傳該網格正中間的位置)
     public Vector3 SnapCoordinateToGrid(Vector3 v3)
     {
         //世界座標到最近的一格Grid
