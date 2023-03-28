@@ -81,18 +81,17 @@ public class BuildingSystem_sc : MonoBehaviour
     public Vector3 V3GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits = Physics.RaycastAll(ray);
-        // RaycastHit[] hits = { }; 
-        // var size = Physics.RaycastNonAlloc(ray, hits);
+        // RaycastHit[] hits = Physics.RaycastAll(ray);
+        RaycastHit[] hits = new RaycastHit[5];
+        var size = Physics.RaycastNonAlloc(ray, hits);
 
         bool b = false;
-        if (hits.Length > 0)
+        if (size > 0)
         {
-            print(">0");
-            foreach (RaycastHit hit in hits)
+            for (int i = 0; i < size; i++)
             {
-                print(hit.transform.gameObject);
-                if (hit.transform.gameObject.CompareTag($"Plane"))
+                print(hits[i].transform.gameObject);
+                if (hits[i].transform.gameObject.CompareTag($"Plane"))
                 {
                     print("In plane.");
                     b = true;
