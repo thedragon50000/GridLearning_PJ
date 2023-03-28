@@ -17,6 +17,7 @@ public class DragObject_sc : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        print("OnMouseDrag");
         Vector3 pos = buildSystem.V3GetMouseWorldPosition() + v3Offset;
         transform.position = buildSystem.SnapCoordinateToGrid(pos);
     }

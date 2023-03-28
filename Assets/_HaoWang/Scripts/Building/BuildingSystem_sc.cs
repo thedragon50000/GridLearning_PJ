@@ -81,7 +81,27 @@ public class BuildingSystem_sc : MonoBehaviour
     public Vector3 V3GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        return Physics.Raycast(ray, out RaycastHit hit) ? hit.point : Vector3.zero;
+        RaycastHit[] hits = Physics.RaycastAll(ray);
+        // RaycastHit[] hits = { }; 
+        // var size = Physics.RaycastNonAlloc(ray, hits);
+
+        bool b = false;
+        if (hits.Length > 0)
+        {
+            print(">0");
+            foreach (RaycastHit hit in hits)
+            {
+                print(hit.transform.gameObject);
+                if (hit.transform.gameObject.CompareTag($"Plane"))
+                {
+                    print("In plane.");
+                    b = true;
+                }
+            }
+        }
+
+        return b ? hits[0].point : Vector3.zero;
+        // return Physics.Raycast(ray, out RaycastHit hit) ? hit.point : Vector3.zero;
     }
 
     /// 將座標捕捉到網格中點(只要在網格內，就回傳該網格正中間的位置)
