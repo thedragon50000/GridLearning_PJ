@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UniRx;
@@ -120,6 +121,7 @@ public class BuildingSystem_sc : MonoBehaviour
     {
         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
         int counter = 0;
+
         foreach (var a in area.allPositionsWithin)
         {
             Vector3Int pos = new Vector3Int(a.x, a.y, 0);
@@ -135,7 +137,7 @@ public class BuildingSystem_sc : MonoBehaviour
     #region Building Placement
 
     /// <summary>
-    /// 將指定的prefab設為_object2Place
+    /// 將指定的prefab設為_object2Place，並放到正中央
     /// </summary>
     /// <param name="prefab"></param>
     private void InitializeWithObject(GameObject prefab)
@@ -150,7 +152,7 @@ public class BuildingSystem_sc : MonoBehaviour
     bool CanBePlaced(PlaceableObject_sc placeable)
     {
         // BoundsInt是Unity中的一個結構體，用於表示一個整數邊界框。
-        // BoundsInt包含一個位置向量position(Vector3Int)和一個大小向量size(Vector3Int)，分別表示邊界框的位置和大小。
+        // BoundsInt包含一個位置向量position(Vector3Int)和一個大小向量size(Vector3Int)，分別表示最左下角的點和長寬高。
         // BoundsInt可以用於在整數網格上進行碰撞檢測、物體選擇等操作。
         BoundsInt area = new BoundsInt
         {
@@ -181,7 +183,7 @@ public class BuildingSystem_sc : MonoBehaviour
     private void TakeArea(Vector3Int start, Vector3Int size)
     {
         // Collider大小會直接影響到佔地面積
-        // BoxFill:從起點開始一長寬高填滿tile base
+        // BoxFill:從起點開始依照長寬高填滿tile base
         mainTilemap.BoxFill(start, crossPipeTileBase, start.x, start.y, start.x + size.x, start.y + size.y);
         _object2Place = null;
     }
